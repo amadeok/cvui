@@ -51,8 +51,7 @@ int main(int argc, const char *argv[])
         if (scaling != currentScaling) {
             frame = cv::Mat(std::lround(scaling * 600), std::lround(scaling * 800), CV_8UC3);
             
-            settings.setPosX(std::lround(scaling*settingsPosX));
-            settings.setPosY(std::lround(scaling*settingsPosY));
+
             settings.setWidth(std::lround(scaling*settingsWidth));
             settings.setHeight(std::lround(scaling*settingsHeight));
             settings.setFontScale(fontScale);
@@ -65,7 +64,8 @@ int main(int argc, const char *argv[])
 
             currentScaling = scaling;
         }
-                
+        settings.setPosX(std::lround(20));
+        settings.setPosY(std::lround(20));
 		// Fill the frame with a nice color
 		frame = cv::Scalar(49, 52, 49);
 

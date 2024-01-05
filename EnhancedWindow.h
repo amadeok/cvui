@@ -28,8 +28,9 @@ private:
 	bool mMinimized;
 	bool mMinimizable;
 	double mFontScale;
-
 public:
+	int* overlappedStatus = nullptr;
+
 	EnhancedWindow(int x, int y, int width, int height, const cv::String& title, bool minimizable = true, double theFontScale = cvui::DEFAULT_FONT_SCALE):
 		mX(x),
 		mY(y),
@@ -42,7 +43,8 @@ public:
 		mIsMoving(false),
 		mMinimized(false),
 		mMinimizable(minimizable),
-		mFontScale(theFontScale) {
+		mFontScale(theFontScale)
+		{
 	}
 
 	void begin(cv::Mat &frame) {
@@ -50,7 +52,7 @@ public:
 		bool mouseInsideTitleArea = cvui::mouse().inside(cv::Rect(mX, mY, mWidth, scaledTitleHeight));
 		mHeight = mMinimized ? scaledTitleHeight : mHeightNotMinimized;
 
-		if (mIsMoving == false && cvui::mouse(cvui::DOWN) && mouseInsideTitleArea) {
+		if (mIsMoving == false && cvui::mouse(cvui::DOWN) && mouseInsideTitleArea && 0) {
 			mDeltaX = cvui::mouse().x - mX;
 			mDeltaY = cvui::mouse().y - mY;
 			mIsMoving = true;
@@ -66,9 +68,17 @@ public:
 			mX = std::min(frame.cols - mWidth, mX);
 			mY = std::min(frame.rows - scaledTitleHeight, mY);
 		}
-
+		//printf("title %s \n", mTitle.c_str());
 		cvui::window(frame, mX, mY, mWidth, mHeight, mTitle, mFontScale);
-		if (mMinimizable && cvui::button(frame, mX + mWidth - scaledTitleHeight, mY + 1, scaledTitleHeight-1, scaledTitleHeight-1, mMinimized ? "+" : "-", mFontScale)) {
+		bool pressoverlapped = true;
+		
+		if (overlappedStatus != nullptr)
+		if (*overlappedStatus == cvui::OVER or  *overlappedStatus == cvui::DOWN)
+			pressoverlapped = false;
+	
+		if (mMinimizable  && cvui::button(frame, mX + mWidth - scaledTitleHeight, mY + 1, scaledTitleHeight-1, scaledTitleHeight-1, mMinimized ? "+" : "-", mFontScale) && pressoverlapped) {
+/*			if (overlappedStatus)
+			printf("over status %s %d \n", mTitle.c_str(),*overlappedStatus); */
 			mMinimized = !mMinimized;
 		}
 		cvui::beginRow(frame, mX + std::lround(10*mFontScale/cvui::DEFAULT_FONT_SCALE), mY + std::lround(30*mFontScale/cvui::DEFAULT_FONT_SCALE), mWidth - scaledTitleHeight, mHeight - scaledTitleHeight);
@@ -140,6 +150,15 @@ public:
 
 	bool isMinimized() const {
 		return mMinimized;
+	}
+	void setMinimized(bool val) {
+		mMinimized = val;
+	}
+	void setTitle(std::string& title) {
+		mTitle = title;
+	}	
+	std::string getTitle() {
+		return mTitle;
 	}
 };
 

@@ -1909,6 +1909,23 @@ namespace internal
 		updateLayoutFlow(theBlock, aSize);
 	}
 
+	cv::Rect rect2(cvui_block_t& theBlock, int theX, int theY, int theWidth, int theHeight, unsigned int theBorderColor, unsigned int theFillingColor) {
+		cv::Point aAnchor(theX, theY);
+		cv::Rect aRect(theX, theY, theWidth, theHeight);
+
+		aRect.x = aRect.width < 0 ? aAnchor.x + aRect.width : aAnchor.x;
+		aRect.y = aRect.height < 0 ? aAnchor.y + aRect.height : aAnchor.y;
+		aRect.width = std::abs(aRect.width);
+		aRect.height = std::abs(aRect.height);
+
+		render::rect(theBlock, aRect, theBorderColor, theFillingColor);
+
+		// Update the layout flow
+		cv::Size aSize(aRect.width, aRect.height);
+		updateLayoutFlow(theBlock, aSize);
+		return aRect;
+	}
+
 	void sparkline(cvui_block_t& theBlock, std::vector<double>& theValues, int theX, int theY, int theWidth, int theHeight, unsigned int theColor) {
 		double aMin, aMax;
 		cv::Rect aRect(theX, theY, theWidth, theHeight);
@@ -2394,6 +2411,11 @@ void rect(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, un
 	internal::rect(internal::gScreen, theX, theY, theWidth, theHeight, theBorderColor, theFillingColor);
 }
 
+cv::Rect rect2(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, unsigned int theBorderColor, unsigned int theFillingColor) {
+	internal::gScreen.where = theWhere;
+	return internal::rect2(internal::gScreen, theX, theY, theWidth, theHeight, theBorderColor, theFillingColor);
+}
+
 void sparkline(cv::Mat& theWhere, std::vector<double>& theValues, int theX, int theY, int theWidth, int theHeight, unsigned int theColor) {
 	internal::gScreen.where = theWhere;
 	internal::sparkline(internal::gScreen, theValues, theX, theY, theWidth, theHeight, theColor);
@@ -2401,6 +2423,9 @@ void sparkline(cv::Mat& theWhere, std::vector<double>& theValues, int theX, int 
 
 int iarea(int theX, int theY, int theWidth, int theHeight) {
 	return internal::iarea(theX, theY, theWidth, theHeight);
+}
+int iarea(cv::Rect rect) {
+	return internal::iarea(rect.x, rect.y, rect.width, rect.height);
 }
 
 void beginRow(cv::Mat &theWhere, int theX, int theY, int theWidth, int theHeight, int thePadding) {
@@ -2487,6 +2512,17 @@ void printf(const char *theFmt, ...) {
 
 	internal::text(aBlock, aBlock.anchor.x, aBlock.anchor.y, internal::gBuffer, DEFAULT_FONT_SCALE, 0xCECECE, true);
 }
+cv::Point printf(cv::Point offset, const char* theFmt, ...) {
+	cvui_block_t& aBlock = internal::topBlock();
+	va_list aArgs;
+
+	va_start(aArgs, theFmt);
+	vsprintf_s(internal::gBuffer, theFmt, aArgs);
+	va_end(aArgs);
+
+	internal::text(aBlock, aBlock.anchor.x+offset.x, aBlock.anchor.y+offset.y, internal::gBuffer, DEFAULT_FONT_SCALE, 0xCECECE, true);
+	return cv::Point(aBlock.anchor.x, aBlock.anchor.y );
+}
 
 int counter(int *theValue, int theStep, const char *theFormat, double theFontScale, unsigned int theInsideColor) {
 	cvui_block_t& aBlock = internal::topBlock();
@@ -2506,6 +2542,15 @@ void window(int theWidth, int theHeight, const cv::String& theTitle, double theF
 void rect(int theWidth, int theHeight, unsigned int theBorderColor, unsigned int theFillingColor) {
 	cvui_block_t& aBlock = internal::topBlock();
 	internal::rect(aBlock, aBlock.anchor.x, aBlock.anchor.y, theWidth, theHeight, theBorderColor, theFillingColor);
+}
+
+cv::Rect rect2(int theWidth, int theHeight, unsigned int theBorderColor, unsigned int theFillingColor) {
+	cvui_block_t& aBlock = internal::topBlock();
+	return internal::rect2(aBlock, aBlock.anchor.x, aBlock.anchor.y, theWidth, theHeight, theBorderColor, theFillingColor);
+}
+cv::Rect rect2(int theWidth, int theHeight, cv::Point offset,  unsigned int theBorderColor, unsigned int theFillingColor) {
+	cvui_block_t& aBlock = internal::topBlock();
+	return internal::rect2(aBlock, aBlock.anchor.x+offset.x, aBlock.anchor.y+offset.y, theWidth, theHeight, theBorderColor, theFillingColor);
 }
 
 void sparkline(std::vector<double>& theValues, int theWidth, int theHeight, unsigned int theColor) {

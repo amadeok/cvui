@@ -26,7 +26,7 @@ int main(int argc, const char *argv[])
 	while (true) {
 		// Fill the frame with a nice color
 		frame = cv::Scalar(49, 52, 49);
-
+ 
 		// Render a rectangle on the screen.
 		cv::Rect rectangle(50, 50, 100, 100);
 		cvui::rect(frame, rectangle.x, rectangle.y, rectangle.width, rectangle.height, 0xff0000);
