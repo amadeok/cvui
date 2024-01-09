@@ -805,6 +805,7 @@ bool button(int theWidth, int theHeight, const cv::String& theLabel, double theF
  \sa endColumn()
 */
 bool button(const cv::String& theLabel, double theFontScale = DEFAULT_FONT_SCALE, unsigned int theInsideColor = DEFAULT_BUTTON_COLOR);
+bool button(const cv::String& theLabel, cv::Point offset, double theFontScale = DEFAULT_FONT_SCALE, unsigned int theInsideColor = DEFAULT_BUTTON_COLOR);
 
 /**
  Display a button whose graphics are images (cv::Mat).
@@ -2464,6 +2465,11 @@ void space(int theValue) {
 bool button(const cv::String& theLabel, double theFontScale, unsigned int theInsideColor) {
 	cvui_block_t& aBlock = internal::topBlock();
 	return internal::button(aBlock, aBlock.anchor.x, aBlock.anchor.y, theLabel, theFontScale, theInsideColor);
+}
+
+bool button(const cv::String& theLabel, cv::Point offset, double theFontScale, unsigned int theInsideColor) {
+	cvui_block_t& aBlock = internal::topBlock();
+	return internal::button(aBlock, aBlock.anchor.x + offset.x, aBlock.anchor.y + offset.y, theLabel, theFontScale, theInsideColor);
 }
 
 bool button(int theWidth, int theHeight, const cv::String& theLabel, double theFontScale, unsigned int theInsideColor) {
